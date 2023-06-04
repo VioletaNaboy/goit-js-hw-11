@@ -1,1 +1,70 @@
 @import '~node_modules/modern-normalize/modern-normalize.css';
+body {
+  background-color: rgba(157, 140, 167, 0.637);
+  font-size: 24px;
+}
+button {
+  padding: 5px 8px 8px;
+  background-color: rgb(252, 238, 250);
+  color: rgba(19, 59, 45, 0.9);
+  border: none;
+  border-radius: 5px;
+  box-shadow: 4px 7px 16px 3px rgba(0, 0, 0, 0.36);
+  transition: all 250ms ease-in-out;
+}
+button:focus,
+button:hover {
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+  font-weight: 700;
+}
+input {
+  margin-right: 15px;
+  border-radius: 5px;
+  color: rgba(19, 59, 45, 0.9);
+  font-weight: 600;
+  background-color: transparent;
+  border: 3px solid rgba(19, 59, 45, 0.9);
+  padding-left: 10px;
+}
+.load-more {
+  display: block;
+  margin: 25px auto;
+}
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.photo-card {
+  background-color: rgba(226, 224, 224, 0.718);
+  height: 290px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+.info {
+  font-size: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+.info-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.hidden {
+  display: none;
+}
+.search-form {
+  display: flex;
+  justify-content: center;
+  margin: 15px auto 30px;
+}
