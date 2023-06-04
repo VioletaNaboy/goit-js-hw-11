@@ -42,7 +42,7 @@ async function getItems(numberOfPage) {
 }
 async function addAdditionFoto(response) {
   if (totalOfFotos < response.data.totalHits) {
-    pageNext = 1 + clickCount;
+    let pageNext = 1 + clickCount;
     const responseNew = await getItems(pageNext);
     await addFoto(responseNew);
 
