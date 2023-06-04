@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { Notify } from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 const searchInput = document.querySelector('[name="searchQuery"]');
 const searchForm = document.querySelector('.search-form');
-const gallery = document.querySelector('.gallery');
+const galleryEl = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
 let numberOfPage = 1;
 let clickCount = 0;
@@ -13,14 +15,18 @@ async function createGallery(event) {
   if (searchInput.value && searchInput.value != ' ') {
     await reset();
     try {
-      const response = await getItems(numberOfPage);
+      const response = await getItems(numberOfPage, 40);
       if (response.data.hits.length) {
         await addFoto(response);
-        await loadMoreBtn.addEventListener('click', () => {
+        let gallery = await new SimpleLightbox('.gallery a');
+        await Notify.success(
+          `Hooray! We found ${response.data.totalHits} images`
+        );
+        loadMoreBtn.addEventListener('click', async () => {
           loadMoreBtn.classList.add('hidden');
-          clickCount++;
-          totalOfFotos += response.data.hits.length;
-          addAdditionFoto(response);
+          clickCount += 1;
+          await addAdditionFoto(response);
+          await gallery.refresh();
         });
       } else {
         Notify.failure(
@@ -34,19 +40,22 @@ async function createGallery(event) {
     Notify.failure('Please enter something');
   }
 }
-async function getItems(numberOfPage) {
+async function getItems(numberOfPage, amount) {
   const query = searchInput.value;
-  const baseUrl = `https://pixabay.com/api/?key=36982063-09f5e87e06cdb5f9f4765ffc0&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40`;
+  const baseUrl = `https://pixabay.com/api/?key=36982063-09f5e87e06cdb5f9f4765ffc0&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${amount}`;
   const response = await axios.get(`${baseUrl}&page=${numberOfPage}`);
   return response;
 }
 async function addAdditionFoto(response) {
   if (totalOfFotos < response.data.totalHits) {
     let pageNext = 1 + clickCount;
-    const responseNew = await getItems(pageNext);
-    await addFoto(responseNew);
-
-    return pageNext;
+    const remainder = response.data.totalHits - totalOfFotos;
+    const responseNew =
+      remainder < 40
+        ? await getItems(pageNext, remainder)
+        : await getItems(pageNext, 40);
+    totalOfFotos += responseNew.data.hits.length;
+    return await addFoto(responseNew);
   } else {
     Notify.failure(
       "We're sorry, but you've reached the end of search results."
@@ -56,9 +65,18 @@ async function addAdditionFoto(response) {
 }
 async function addFoto(response) {
   const foto = await response.data.hits
-    .map(({ webformatURL, tags, likes, views, comments, downloads }) => {
-      return `<div class="photo-card">
-  <img src="${webformatURL}" alt="${tags}" loading="lazy" width="250px"/>
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => {
+        return `<div class="photo-card"><a href="${largeImageURL}">
+  <img src="${webformatURL}" alt="${tags}" loading="lazy" width="250px"/></a>
   <div class="info">
     <p class="info-item">
       <b>Likes </b><span>${likes}</span>
@@ -74,14 +92,15 @@ async function addFoto(response) {
     </p>
   </div>
 </div>`;
-    })
+      }
+    )
     .join('');
-  await loadMoreBtn.classList.remove('hidden');
-  return gallery.insertAdjacentHTML('beforeend', foto);
+  loadMoreBtn.classList.remove('hidden');
+  return galleryEl.insertAdjacentHTML('beforeend', foto);
 }
 async function reset() {
   totalOfFotos = 40;
   clickCount = 0;
-  gallery.innerHTML = '';
+  galleryEl.innerHTML = '';
   await loadMoreBtn.classList.add('hidden');
 }
